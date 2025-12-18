@@ -4,18 +4,26 @@ use anyhow::{Ok, Result};
 use axum::{
     Router,
     http::{
-        Method, StatusCode, header::{AUTHORIZATION, CONTENT_TYPE}
+        Method, StatusCode,
+        header::{AUTHORIZATION, CONTENT_TYPE},
     },
 };
 use tokio::net::TcpListener;
 use tower_http::{
-    cors::{Any, CorsLayer}, limit::RequestBodyLimitLayer, services::{self, ServeDir, ServeFile}, timeout::TimeoutLayer, trace::TraceLayer
+    cors::{Any, CorsLayer},
+    limit::RequestBodyLimitLayer,
+    services::{self, ServeDir, ServeFile},
+    timeout::TimeoutLayer,
+    trace::TraceLayer,
 };
 use tracing::info;
 
 use crate::{
     config::config_model::DotEnvyConfig,
-    infrastructure::{database::postgresql_connection::PgPoolSquad, http::routers::default_routers},
+    infrastructure::{
+        database::postgresql_connection::PgPoolSquad,
+        http::routers::{self, default_routers},
+    },
 };
 
 fn static_serve() -> Router {
@@ -26,17 +34,21 @@ fn static_serve() -> Router {
     Router::new().fallback_service(service)
 }
 
-fn api_serve() -> Router {
-    Router::new().fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
+fn api_serve(db_pool: Arc<PgPoolSquad>) -> Router {
+    Router::new()
+        .nest("/brawlers", routers::brawlers::routes(Arc::clone(&db_pool)))
+        .nest("/missions", routers::mission_management::routes(Arc::clone(&db_pool)))
+        .nest("/authentication", routers::authentication::routes(Arc::clone(&db_pool)))
+        .fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
 }
 
 pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Result<()> {
     let app = Router::new()
         .merge(static_serve())
-        .nest("/api", api_serve())
+        .nest("/api", api_serve(db_pool))
         //.fallback(default_routers::health_check)
         // .route("/health_check", get(default_router::health_check)
-        .layer(TimeoutLayer::new(Duration::from_secs(
+        .layer(tower_http::timeout::TimeoutLayer::new(Duration::from_secs(
             config.server.timeout,
         )))
         .layer(RequestBodyLimitLayer::new(
@@ -67,9 +79,6 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
 
     Ok(())
 }
-
-
-
 
 async fn shutdown_signal() {
     let ctrl_c = async { tokio::signal::ctrl_c().await.expect("Fail ctrl + c") };

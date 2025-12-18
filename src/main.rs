@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use server::{
-    config::config_loader,
-    infrastructure::{database::postgresql_connection, http::http_serv::start},
-};
+
+
+use server::{config::config_loader, infrastructure::{database::postgresql_connection, http::http_serv::start}};
 use tracing::{error, info};
 
 #[tokio::main]
