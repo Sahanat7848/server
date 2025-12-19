@@ -1,0 +1,36 @@
+@base_url = http://localhost:8000/api      
+@access_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4IiwiZXhwIjoxNzY2MjA1ODg5LCJpYXQiOjE3NjYxMTk0ODl9.cOtaHA1hyM0YMeWlog8fEzGmS_YY5KJW-YiyS7ycvVE
+### create new mission
+# @prompt mission_name Mission Name
+# @prompt description Mission Description
+POST {{base_url}}/missions/create
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+
+{
+    "name": "{{mission_name}}",
+    "description":"{{description}}"
+}
+
+
+### update mission
+# @prompt mission_id Mission ID
+# @prompt mission_name Mission Name
+# @prompt description Mission Description
+PATCH {{base_url}}/missions/{{mission_id}}/edit
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+
+{
+    "name": "{{mission_name}}",
+    "description": "{{description}}"
+}
+
+
+### remove mission
+# @prompt mission_id Mission ID
+DELETE {{base_url}}/missions/{{mission_id}}/remove
+Content-Type: application/json
+Authorization: Bearer {{access_token}}

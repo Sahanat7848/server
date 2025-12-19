@@ -10,18 +10,18 @@ use crate::domain::value_object::mission_statuses::MissionStatuses;
 use crate::infrastructure::database::postgresql_connection::PgPoolSquad;
 use crate::infrastructure::database::schema::missions;
 
-pub struct MisssionManagementPostgres {
+pub struct MissionManagementPostgres {
     db_pool: Arc<PgPoolSquad>,
 }
 
-impl MisssionManagementPostgres {
+impl MissionManagementPostgres {
     pub fn new(db_pool: Arc<PgPoolSquad>) -> Self {
         Self { db_pool }
     }
 }
 
 #[async_trait]
-impl MissionManagementRepository for MisssionManagementPostgres {
+impl MissionManagementRepository for MissionManagementPostgres {
     async fn add(&self, add_mission_entity: AddMissionEntity) -> Result<i32> {
         let mut connection = self
             .db_pool

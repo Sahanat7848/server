@@ -42,13 +42,13 @@ where
         let iat = now.timestamp() as usize;
 
         let claims = Claims {
-            sub: brawler.username,
+            sub: brawler.id.to_string(),
             exp,
             iat,
         };
 
-        // TODO: Get secret from config
-        let secret = std::env::var("JWT_SECRET").unwrap_or_else(|_| "secret".to_string());
+        let secret = crate::config::config_loader::get_user_secret()
+            .map_err(|e| anyhow!("Failed to get secret: {}", e))?;
         let token = jwt::generate_token(secret, &claims)?;
 
         Ok(Passport { token })

@@ -37,8 +37,15 @@ fn static_serve() -> Router {
 fn api_serve(db_pool: Arc<PgPoolSquad>) -> Router {
     Router::new()
         .nest("/brawlers", routers::brawlers::routes(Arc::clone(&db_pool)))
-        .nest("/missions", routers::mission_management::routes(Arc::clone(&db_pool)))
-        .nest("/authentication", routers::authentication::routes(Arc::clone(&db_pool)))
+        .nest("/crew_operation", routers::crew_operation::routes(Arc::clone(&db_pool)))
+        .nest(
+            "/missions",
+            routers::mission_management::routes(Arc::clone(&db_pool)),
+        )
+        .nest(
+            "/authentication",
+            routers::authentication::routes(Arc::clone(&db_pool)),
+        )
         .fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
 }
 

@@ -9,18 +9,18 @@ use crate::domain::value_object::mission_filter::MissionFilter;
 use crate::infrastructure::database::postgresql_connection::PgPoolSquad;
 use crate::infrastructure::database::schema::{crew_memberships, missions};
 
-pub struct MisssionViewingPostgres {
+pub struct MissionViewingPostgres {
     db_pool: Arc<PgPoolSquad>,
 }
 
-impl MisssionViewingPostgres {
+impl MissionViewingPostgres {
     pub fn new(db_pool: Arc<PgPoolSquad>) -> Self {
         Self { db_pool }
     }
 }
 
 #[async_trait]
-impl MissionViewingRepository for MisssionViewingPostgres {
+impl MissionViewingRepository for MissionViewingPostgres {
     async fn get_one(&self, mission_id: i32) -> Result<MissionEntity> {
         let mut conn = self.db_pool.get()?;
 
