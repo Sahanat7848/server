@@ -1,6 +1,5 @@
 @base_url = http://localhost:8000/api
-@access_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4IiwiZXhwIjoxNzY2MjA1ODg5LCJpYXQiOjE3NjYxMTk0ODl9.cOtaHA1hyM0YMeWlog8fEzGmS_YY5KJW-YiyS7ycvVE
-
+@access_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMCIsImV4cCI6MTc2NzI1MDYyOSwiaWF0IjoxNzY2NjQ1ODI5fQ.wqHLqC7hhSpdCaNpP5N_CkZJiU3svx7ngcvRZ4PuYTc
 ### join mission
 # @prompt mission_id Mission ID to Join
 POST  {{base_url}}/crew_operation/join/{{mission_id}}

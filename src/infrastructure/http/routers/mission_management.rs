@@ -23,7 +23,7 @@ use crate::{
         database::repositories::{
             mission_management::MissionManagementPostgres, mission_viewing::MissionViewingPostgres,
         },
-        http::middlewares::auth::auth,
+        http::middlewares::auth::authorization,
     },
 };
 
@@ -100,6 +100,6 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
             "/{mission_id}/remove",
             delete(remove::<MissionManagementPostgres, MissionViewingPostgres>),
         )
-        .route_layer(middleware::from_fn(auth))
+        .route_layer(middleware::from_fn(authorization))
         .with_state(Arc::new(use_case))
 }

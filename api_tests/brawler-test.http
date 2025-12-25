@@ -1,18 +1,21 @@
-```
+@base_url = http://localhost:8000/api
+
 ### register
 # @prompt username
-POST http://localhost:8000/api/brawlers/register
+# @prompt display_name
+POST {{base_url}}/brawlers/register
 Content-Type: application/json
 
 
 {
     "username": "{{username}}",
-    "password": "P@ssw0rd!"
+    "password": "P@ssw0rd!",
+    "display_name": "{{display_name}}"
 }
 
 ### login
 # @prompt username
-POST http://localhost:8000/api/authentication/login
+POST {{base_url}}/authentication/login
 Content-Type: application/json
 
 {

@@ -1,18 +1,19 @@
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use axum::{
     Router,
     http::{
         Method, StatusCode,
         header::{AUTHORIZATION, CONTENT_TYPE},
     },
+    routing::get,
 };
 use tokio::net::TcpListener;
 use tower_http::{
     cors::{Any, CorsLayer},
     limit::RequestBodyLimitLayer,
-    services::{self, ServeDir, ServeFile},
+    services::{ServeDir, ServeFile},
     timeout::TimeoutLayer,
     trace::TraceLayer,
 };
@@ -22,7 +23,7 @@ use crate::{
     config::config_model::DotEnvyConfig,
     infrastructure::{
         database::postgresql_connection::PgPoolSquad,
-        http::routers::{self, default_routers},
+        http::routers::{self},
     },
 };
 
@@ -37,14 +38,25 @@ fn static_serve() -> Router {
 fn api_serve(db_pool: Arc<PgPoolSquad>) -> Router {
     Router::new()
         .nest("/brawlers", routers::brawlers::routes(Arc::clone(&db_pool)))
-        .nest("/crew_operation", routers::crew_operation::routes(Arc::clone(&db_pool)))
+        .nest(
+            "/authentication",
+            routers::authentication::routes(Arc::clone(&db_pool)),
+        )
         .nest(
             "/missions",
             routers::mission_management::routes(Arc::clone(&db_pool)),
         )
         .nest(
-            "/authentication",
-            routers::authentication::routes(Arc::clone(&db_pool)),
+            "/crew_operation",
+            routers::crew_operation::routes(Arc::clone(&db_pool)),
+        )
+        .nest(
+            "/mission",
+            routers::mission_operation::routes(Arc::clone(&db_pool)),
+        )
+        .nest(
+            "/view",
+            routers::mission_viewing::routes(Arc::clone(&db_pool)),
         )
         .fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
 }
@@ -53,11 +65,13 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let app = Router::new()
         .merge(static_serve())
         .nest("/api", api_serve(db_pool))
-        //.fallback(default_routers::health_check)
+        .route("/health_check", get(routers::default_routers::health_check))
+        // .fallback(default_router::health_check)
         // .route("/health_check", get(default_router::health_check)
-        .layer(tower_http::timeout::TimeoutLayer::new(Duration::from_secs(
-            config.server.timeout,
-        )))
+        .layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(config.server.timeout),
+        ))
         .layer(RequestBodyLimitLayer::new(
             (config.server.body_limit * 1024 * 1024).try_into()?,
         ))

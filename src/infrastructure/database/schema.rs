@@ -9,6 +9,10 @@ diesel::table! {
         password -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        #[max_length = 255]
+        display_name -> Varchar,
+        avatar_url -> Nullable<Text>,
+        avatar_public_id -> Nullable<Text>,
     }
 }
 

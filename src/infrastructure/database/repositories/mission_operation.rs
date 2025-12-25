@@ -8,11 +8,11 @@ use crate::domain::value_object::mission_statuses::MissionStatuses;
 use crate::infrastructure::database::postgresql_connection::PgPoolSquad;
 use crate::infrastructure::database::schema::missions;
 
-pub struct MisssionOperationPostgres {
+pub struct MissionOperationPostgres {
     db_pool: Arc<PgPoolSquad>,
 }
 
-impl MisssionOperationPostgres {
+impl MissionOperationPostgres {
     pub fn new(db_pool: Arc<PgPoolSquad>) -> Self {
         Self { db_pool }
     }
@@ -47,7 +47,7 @@ impl MisssionOperationPostgres {
 }
 
 #[async_trait]
-impl MissionOperationRepository for MisssionOperationPostgres {
+impl MissionOperationRepository for MissionOperationPostgres {
     async fn in_progress(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
         self.set_status(mission_id, chief_id, MissionStatuses::InProgress)
             .await

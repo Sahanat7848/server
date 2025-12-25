@@ -20,12 +20,20 @@ impl fmt::Display for Stage {
 }
 
 impl Stage {
-    pub fn try_form(stage: &str) -> Result<Self> {
+    pub fn try_from_str(stage: &str) -> Result<Self> {
         match stage {
             "Local" => Ok(Self::Local),
-            "Dev" => Ok(Self::Development),
-            "Prod" => Ok(Self::Production),
+            "Dev" | "Development" => Ok(Self::Development),
+            "Prod" | "Production" => Ok(Self::Production),
             _ => Err(anyhow::anyhow!("Invalid stage")),
         }
+    }
+}
+
+impl std::str::FromStr for Stage {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::try_from_str(s)
     }
 }

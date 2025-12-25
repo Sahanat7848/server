@@ -1,40 +1,62 @@
-use std::result;
 use std::sync::Arc;
 
-use axum::Json;
-use axum::extract::State;
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::routing::post;
-use axum::{Router, routing::get};
+use axum::{
+    Extension, Json, Router, extract::State, http::StatusCode, response::IntoResponse,
+    routing::post,
+};
 
-use crate::application::use_cases;
-use crate::domain::repositories::brawlers::BrawlerRepository;
-use crate::domain::value_object::brawler_model::RegisterBrawlerModel;
-use crate::infrastructure::database::repositories::brawlers::BrawlerPostgres;
 use crate::{
     application::use_cases::brawlers::BrawlersUseCase,
-    infrastructure::database::postgresql_connection::PgPoolSquad,
+    domain::{
+        repositories::brawlers::BrawlerRepository,
+        value_object::{brawler_model::RegisterBrawlerModel, upload_image::UploadAvatar},
+    },
+    infrastructure::{
+        database::{postgresql_connection::PgPoolSquad, repositories::brawlers::BrawlerPostgres},
+        http::middlewares::auth::authorization,
+    },
 };
 
 pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
-    let brawler_repository = BrawlerPostgres::new(db_pool);
-    let use_case = BrawlersUseCase::new(Arc::new(brawler_repository));
+    let brawlers_repository = BrawlerPostgres::new(db_pool);
+    let brawlers_use_case = BrawlersUseCase::new(Arc::new(brawlers_repository));
+
+    let protected_router = Router::new()
+        .route("/avatar", post(upload_avatar))
+        .route_layer(axum::middleware::from_fn(authorization));
 
     Router::new()
-    .route("/register", post(register))
-    .with_state(Arc::new(use_case))
+        .merge(protected_router)
+        .route("/register", post(register))
+        .with_state(Arc::new(brawlers_use_case))
 }
 
 pub async fn register<T>(
-    State(use_case): State<Arc<BrawlersUseCase<T>>>,
-    Json(model): Json<RegisterBrawlerModel>,
+    State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
+    Json(register_brawler_model): Json<RegisterBrawlerModel>,
 ) -> impl IntoResponse
 where
     T: BrawlerRepository + Send + Sync,
 {
-    match use_case.register(model).await {
-        Ok(user_id) => (StatusCode::CREATED, user_id.to_string()).into_response(),
+    match brawlers_use_case.register(register_brawler_model).await {
+        Ok(passport) => (StatusCode::CREATED, Json(passport)).into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+    }
+}
+
+pub async fn upload_avatar<T>(
+    State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
+    Extension(brawler_id): Extension<i32>,
+    Json(upload_image): Json<UploadAvatar>,
+) -> impl IntoResponse
+where
+    T: BrawlerRepository + Send + Sync,
+{
+    match brawlers_use_case
+        .upload_avatar(upload_image.base64_string, brawler_id)
+        .await
+    {
+        Ok(uploaded_image) => (StatusCode::CREATED, Json(uploaded_image)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
 }
