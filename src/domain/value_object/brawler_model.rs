@@ -33,3 +33,4 @@ pub struct BrawlerModel {
     #[diesel(sql_type = BigInt)]
     pub mission_joined_count: i64,
 }
+

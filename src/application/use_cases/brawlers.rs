@@ -33,27 +33,25 @@ where
 
         let register_entity = register_model.to_entity();
 
-        let brawler_id = self.brawler_repository.register(register_entity).await?;
+        let user_id = self.brawler_repository.register(register_entity).await?;
 
-        let passport = Passport::new(brawler_id)?;
+        let passport = Passport::new(user_id)?;
         Ok(passport)
     }
-    pub async fn upload_avatar(
+    pub async fn upload_base64image(
         &self,
+        user_id: i32,
         base64_image: String,
-        brawler_id: i32,
     ) -> Result<UploadedImage> {
-        let option = UploadImageOptions {
-            folder: Some("brawlers_avatar".to_string()),
-            public_id: Some(brawler_id.to_string()),
+        let opt = UploadImageOptions {
+            folder: Some("avatars".to_string()),
+            public_id: Some(user_id.to_string()),
             transformation: Some("c_scale,w_256".to_string()),
         };
-
-        let base64_image = Base64Image::new(base64_image)?;
-
+        let base64_image_vo = Base64Image::new(base64_image)?;
         let uploaded_image = self
             .brawler_repository
-            .upload_avatar(brawler_id, base64_image, option)
+            .upload_base64image(user_id, base64_image_vo, opt)
             .await?;
 
         Ok(uploaded_image)

@@ -26,8 +26,8 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
         .route_layer(axum::middleware::from_fn(authorization));
 
     Router::new()
-        .merge(protected_router)
         .route("/register", post(register))
+        .merge(protected_router)
         .with_state(Arc::new(brawlers_use_case))
 }
 
@@ -53,7 +53,7 @@ where
     T: BrawlerRepository + Send + Sync,
 {
     match brawlers_use_case
-        .upload_avatar(upload_image.base64_string, brawler_id)
+        .upload_base64image(brawler_id, upload_image.base64_string)
         .await
     {
         Ok(uploaded_image) => (StatusCode::CREATED, Json(uploaded_image)).into_response(),

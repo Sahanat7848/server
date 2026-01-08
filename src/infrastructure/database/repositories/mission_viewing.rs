@@ -72,14 +72,15 @@ impl MissionViewingRepository for MissionViewingPostgres {
 
         Ok(value)
     }
-    async fn get_mission_count(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
+    async fn get_crew(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
         let sql = r#"
             SELECT 
-               COALESCE(b.avatar_url, '') AS avatar_url
-               COALESCE(s.success_count, 0) AS success_count,
-               COALESCE(j.joined_count, 0) AS joined_count,
+               b.display_name AS display_name,
+               COALESCE(b.avatar_url, '') AS avatar_url,
+               COALESCE(s.success_count, 0) AS mission_success_count,
+               COALESCE(j.joined_count, 0) AS mission_joined_count
             FROM 
                 crew_memberships cm
             INNER JOIN 
@@ -94,7 +95,7 @@ impl MissionViewingRepository for MissionViewingPostgres {
                     INNER JOIN 
                         missions m2 ON m2.id = cm2.mission_id
                     WHERE 
-                        m2.status = 'completed' AND m2.id = $1
+                        m2.status = 'completed'
                     GROUP BY 
                         cm2.brawler_id
                 ) s ON s.brawler_id = cm.brawler_id

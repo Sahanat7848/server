@@ -1,4 +1,10 @@
-use crate::{domain::{entities::brawlers::{BrawlerEntity, RegisterBrawlerEntity}, value_object::{base64_image::Base64Image, upload_image::UploadedImage}}, infrastructure::{cloudinary::{UploadImageOptions}}};
+use crate::{
+    domain::{
+        entities::brawlers::{BrawlerEntity, RegisterBrawlerEntity},
+        value_object::{base64_image::Base64Image, upload_image::UploadedImage},
+    },
+    infrastructure::cloudinary::UploadImageOptions,
+};
 use anyhow::Result;
 use async_trait::async_trait;
 
@@ -6,7 +12,7 @@ use async_trait::async_trait;
 pub trait BrawlerRepository {
     async fn register(&self, register_brawler_entity: RegisterBrawlerEntity) -> Result<i32>;
     async fn find_by_username(&self, username: &String) -> Result<BrawlerEntity>;
-    async fn upload_avatar(
+    async fn upload_base64image(
         &self,
         brawler_id: i32,
         base64_image: Base64Image,

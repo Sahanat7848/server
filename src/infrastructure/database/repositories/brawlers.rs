@@ -9,9 +9,13 @@ use std::sync::Arc;
 use crate::{
     domain::{
         entities::brawlers::{BrawlerEntity, RegisterBrawlerEntity},
-        repositories::brawlers::BrawlerRepository, value_object::{base64_image::Base64Image, upload_image::UploadedImage},
+        repositories::brawlers::BrawlerRepository,
+        value_object::{base64_image::Base64Image, upload_image::UploadedImage},
     },
-    infrastructure::{cloudinary::UploadImageOptions, database::{postgresql_connection::PgPoolSquad, schema::brawlers}},
+    infrastructure::{
+        cloudinary::UploadImageOptions,
+        database::{postgresql_connection::PgPoolSquad, schema::brawlers},
+    },
 };
 
 pub struct BrawlerPostgres {
@@ -47,13 +51,13 @@ impl BrawlerRepository for BrawlerPostgres {
 
         Ok(result)
     }
-    async fn upload_avatar(
+    async fn upload_base64image(
         &self,
         brawler_id: i32,
         base64_image: Base64Image,
         option: UploadImageOptions,
     ) -> Result<UploadedImage> {
-        let uploaded_image =    
+        let uploaded_image =
             crate::infrastructure::cloudinary::upload(base64_image, option).await?;
 
         let mut conn = Arc::clone(&self.db_pool).get()?;
