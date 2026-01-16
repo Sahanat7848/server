@@ -35,7 +35,7 @@ where
 
         let user_id = self.brawler_repository.register(register_entity).await?;
 
-        let passport = Passport::new(user_id)?;
+        let passport = Passport::new(user_id, register_model.display_name, None)?;
         Ok(passport)
     }
     pub async fn upload_base64image(

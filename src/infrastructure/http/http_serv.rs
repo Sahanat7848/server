@@ -43,6 +43,10 @@ fn api_serve(db_pool: Arc<PgPoolSquad>) -> Router {
             routers::authentication::routes(Arc::clone(&db_pool)),
         )
         .nest(
+            "/util",
+            routers::default_routers::routes(),
+        )
+        .nest(
             "/missions",
             routers::mission_management::routes(Arc::clone(&db_pool)),
         )
@@ -68,6 +72,7 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .route("/health_check", get(routers::default_routers::health_check))
         // .fallback(default_router::health_check)
         // .route("/health_check", get(default_router::health_check)
+         //.route("/make_error", get(default_router::make_error))
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(config.server.timeout),
