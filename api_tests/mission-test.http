@@ -1,5 +1,6 @@
 @base_url = http://localhost:8000/api
-@access_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5IiwiZXhwIjoxNzY3MjQ5MjMwLCJpYXQiOjE3NjY2NDQ0MzB9.QBr0wes6taOHx3flmiYRNLziUXWR1JleBM3eA8rBWC4
+@access_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMSIsImV4cCI6MTc2OTY3Nzg3MSwiaWF0IjoxNzY5MDczMDcxfQ.7RHULK-MJCVnHxNQJHPwVqJWMlGquLU1TKQfXfQQ6lo
+
 ### create new mission
 # @prompt mission_name Mission Name
 # @prompt description Mission Description
