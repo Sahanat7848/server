@@ -30,7 +30,10 @@ where
         }
     }
     pub async fn in_progress(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self
+            .missiom_viewing_repository
+            .view_detail(mission_id)
+            .await?;
 
         let crew_count = self
             .missiom_viewing_repository
@@ -53,7 +56,7 @@ where
             ));
         }
 
-        if crew_count > MAX_CREW_PER_MISSION as i64 {
+        if crew_count > MAX_CREW_PER_MISSION as u32 {
             return Err(anyhow::anyhow!(
                 "Mission crew exceeds maximum limit of {}",
                 MAX_CREW_PER_MISSION
@@ -74,7 +77,10 @@ where
         Ok(result)
     }
     pub async fn to_completed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self
+            .missiom_viewing_repository
+            .view_detail(mission_id)
+            .await?;
 
         if mission.status != MissionStatuses::InProgress.to_string() {
             return Err(anyhow::anyhow!(
@@ -99,7 +105,10 @@ where
     }
 
     pub async fn to_failed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self
+            .missiom_viewing_repository
+            .view_detail(mission_id)
+            .await?;
 
         if mission.status != MissionStatuses::InProgress.to_string() {
             return Err(anyhow::anyhow!(

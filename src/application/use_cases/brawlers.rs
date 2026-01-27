@@ -3,7 +3,7 @@ use crate::{
         repositories::brawlers::BrawlerRepository,
         value_object::{
             base64_image::Base64Image, brawler_model::RegisterBrawlerModel,
-            upload_image::UploadedImage,
+            mission_moddel::MissionModel, upload_image::UploadedImage,
         },
     },
     infrastructure::{argon2::hash, cloudinary::UploadImageOptions, jwt::jwt_model::Passport},
@@ -55,5 +55,11 @@ where
             .await?;
 
         Ok(uploaded_image)
+    }
+
+    pub async fn get_my_missions(&self, brawler_id: i32) -> Result<Vec<MissionModel>> {
+        let result = self.brawler_repository.get_missions(brawler_id).await?;
+
+        Ok(result)
     }
 }

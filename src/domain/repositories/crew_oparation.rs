@@ -1,10 +1,7 @@
 use crate::domain::entities::crew_memberships::CrewMemberShips;
 use anyhow::Result;
 use async_trait::async_trait;
-use diesel::{
-    PgConnection,
-    r2d2::{ConnectionManager, PooledConnection},
-};
+use diesel::PgConnection;
 use mockall::automock;
 
 #[async_trait]

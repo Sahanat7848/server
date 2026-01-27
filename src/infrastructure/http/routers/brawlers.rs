@@ -1,8 +1,11 @@
 use std::sync::Arc;
 
 use axum::{
-    Extension, Json, Router, extract::State, http::StatusCode, response::IntoResponse,
-    routing::post,
+    Extension, Json, Router,
+    extract::State,
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
 };
 
 use crate::{
@@ -23,12 +26,26 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
 
     let protected_router = Router::new()
         .route("/avatar", post(upload_avatar))
+        .route("/my-missions", get(get_mission))
         .route_layer(axum::middleware::from_fn(authorization));
 
     Router::new()
         .route("/register", post(register))
         .merge(protected_router)
         .with_state(Arc::new(brawlers_use_case))
+}
+
+pub async fn get_mission<T>(
+    State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
+    Extension(brawler_id): Extension<i32>,
+) -> impl IntoResponse
+where
+    T: BrawlerRepository + Send + Sync,
+{
+    match brawlers_use_case.get_my_missions(brawler_id).await {
+        Ok(missions) => (StatusCode::OK, Json(missions)).into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+    }
 }
 
 pub async fn register<T>(

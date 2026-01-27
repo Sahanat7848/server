@@ -1,12 +1,9 @@
 use anyhow::Result;
 use async_trait::async_trait;
+use diesel::PgConnection;
+use diesel::RunQueryDsl;
 use diesel::delete;
 use diesel::prelude::*;
-use diesel::{
-    PgConnection,
-    r2d2::{ConnectionManager, PooledConnection},
-};
-use diesel::{RunQueryDsl, SelectableHelper};
 use std::sync::Arc;
 
 use crate::domain::entities::crew_memberships::CrewMemberShips;
