@@ -59,22 +59,6 @@ where
     }
 
     pub async fn update_display_name(&self, brawler_id: i32, new_name: String) -> Result<()> {
-        let brawler = self.brawler_repository.find_by_id(brawler_id).await?;
-
-        let is_local = std::env::var("STAGE")
-            .map(|s| s == "Local")
-            .unwrap_or(false);
-        let now = chrono::Utc::now().naive_utc();
-        let seven_days_ago = now - chrono::Duration::days(7);
-
-        if !is_local && brawler.name_updated_at > seven_days_ago {
-            let next_available = brawler.name_updated_at + chrono::Duration::days(7);
-            return Err(anyhow::anyhow!(
-                "You can only change your name every 7 days. Next available: {}",
-                next_available.format("%Y-%m-%d %H:%M:%S")
-            ));
-        }
-
         self.brawler_repository
             .update_name(brawler_id, new_name)
             .await?;
