@@ -1,6 +1,9 @@
 use anyhow::Result;
 use async_trait::async_trait;
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper, insert_into};
+use diesel::{
+    ExpressionMethods, OptionalExtension, PgTextExpressionMethods, QueryDsl, RunQueryDsl,
+    SelectableHelper, insert_into,
+};
 use std::sync::Arc;
 
 use crate::{
@@ -53,6 +56,44 @@ impl BrawlerRepository for BrawlerPostgres {
 
         Ok(result)
     }
+    async fn find_by_id(&self, brawler_id: i32) -> Result<BrawlerEntity> {
+        let mut connection = Arc::clone(&self.db_pool).get()?;
+
+        let result = brawlers::table
+            .filter(brawlers::id.eq(brawler_id))
+            .select(BrawlerEntity::as_select())
+            .first::<BrawlerEntity>(&mut connection)?;
+
+        Ok(result)
+    }
+
+    async fn find_by_name_and_tag(&self, name: &str, tag: &str) -> Result<Option<BrawlerEntity>> {
+        let mut connection = Arc::clone(&self.db_pool).get()?;
+
+        let result = brawlers::table
+            .filter(brawlers::display_name.ilike(name))
+            .filter(brawlers::tag.eq(tag))
+            .select(BrawlerEntity::as_select())
+            .first::<BrawlerEntity>(&mut connection)
+            .optional()?;
+
+        Ok(result)
+    }
+
+    async fn update_name(&self, brawler_id: i32, new_name: String) -> Result<()> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        diesel::update(brawlers::table)
+            .filter(brawlers::id.eq(brawler_id))
+            .set((
+                brawlers::display_name.eq(new_name),
+                brawlers::name_updated_at.eq(chrono::Utc::now().naive_utc()),
+            ))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
     async fn upload_base64image(
         &self,
         brawler_id: i32,

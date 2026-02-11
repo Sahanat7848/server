@@ -13,7 +13,8 @@ pub struct BrawlerEntity {
     pub display_name: String,
     pub avatar_url: Option<String>,
     pub avatar_public_id: Option<String>,
-
+    pub name_updated_at: NaiveDateTime,
+    pub tag: String,
 }
 
 #[derive(Debug, Clone, Insertable)]
@@ -22,4 +23,5 @@ pub struct RegisterBrawlerEntity {
     pub username: String,
     pub password: String,
     pub display_name: String,
+    pub tag: String,
 }

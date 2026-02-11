@@ -37,6 +37,7 @@ where
         let passport = Passport::new(
             brawler_entity.id,
             brawler_entity.display_name,
+            brawler_entity.tag,
             brawler_entity.avatar_url,
         )?;
 

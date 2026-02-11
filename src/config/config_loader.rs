@@ -47,6 +47,7 @@ pub fn get_stage() -> Stage {
 }
 
 pub fn get_user_secret() -> Result<String> {
+    dotenvy::dotenv().ok();
     let secret_env = std::env::var("JWT_SECRET")
         .or_else(|_| std::env::var("JWT_USER_SECRET"))
         .map_err(|_| anyhow::anyhow!("JWT_SECRET or JWT_USER_SECRET not set"))?;

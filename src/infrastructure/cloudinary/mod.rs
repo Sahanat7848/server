@@ -33,26 +33,28 @@ fn form_builder(option: UploadImageOptions, cloud_env: &CloudinaryEnv) -> Result
 
     let mut sorted_keys: Vec<_> = params_to_sign.keys().collect();
     sorted_keys.sort();
-    for (i, key) in sorted_keys.iter().enumerate() {
-        if let Some(value) = &params_to_sign.get(*key) {
-            let key_str = key.to_string();
-            let value_str = value.to_string();
-            if key_str != "resource_type" {
-                let key_value = &format!("{}={}", key_str, value_str);
-                hasher.update(key_value);
-                if i < sorted_keys.len() - 1 {
-                    hasher.update("&");
-                }
-            };
 
-            form = form.text(key_str, value_str);
+    let mut sign_string = String::new();
+    for key in sorted_keys {
+        if key == "resource_type" {
+            continue;
         }
+        if !sign_string.is_empty() {
+            sign_string.push('&');
+        }
+        let value = params_to_sign.get(key).unwrap();
+        sign_string.push_str(&format!("{}={}", key, value));
     }
+
+    hasher.update(sign_string);
     hasher.update(cloud_env.api_secret.clone());
+
+    for (key, value) in params_to_sign {
+        form = form.text(key, value);
+    }
 
     form = form.text("signature", format!("{:x}", hasher.finalize()));
     form = form.text("api_key", cloud_env.api_key.clone());
-    form = form.text("timestamp", timestamp.clone());
 
     Ok(form)
 }

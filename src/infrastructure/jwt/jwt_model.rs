@@ -6,10 +6,12 @@ use crate::{config::config_loader::get_jwt_env, infrastructure::jwt::generate_to
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Passport {
+    pub brawler_id: i32,
     pub access_token: String,
     pub token_type: String,
     pub expires_in: usize,
     pub display_name: String,
+    pub tag: String,
     pub avatar_url: Option<String>,
 }
 
@@ -21,7 +23,12 @@ pub struct Claims {
 }
 
 impl Passport {
-    pub fn new(brawler_id: i32, display_name: String, avatar_url: Option<String>) -> Result<Self> {
+    pub fn new(
+        brawler_id: i32,
+        display_name: String,
+        tag: String,
+        avatar_url: Option<String>,
+    ) -> Result<Self> {
         let jwt_env = get_jwt_env()?;
         let token_type = "Bearer".to_string();
         let expires_in = (Utc::now() + Duration::days(jwt_env.lift_time_days)).timestamp() as usize;
@@ -34,10 +41,12 @@ impl Passport {
         let access_token = generate_token(jwt_env.secret, &access_token_claims)?;
 
         Ok(Self {
+            brawler_id,
             token_type,
             access_token,
             expires_in,
             display_name,
+            tag,
             avatar_url,
         })
     }

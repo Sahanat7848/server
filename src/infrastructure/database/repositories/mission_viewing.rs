@@ -94,16 +94,22 @@ impl MissionViewingRepository for MissionViewingPostgres {
             WHERE 
                 m.deleted_at IS NULL AND
                 ($1 IS NULL OR m.status = $1) AND
-                ($2 IS NULL OR m.name ILIKE $2)
+                ($2 IS NULL OR m.name ILIKE $2) AND
+                ($3 IS NULL OR EXISTS (
+                    SELECT 1 FROM crew_memberships cm 
+                    WHERE cm.mission_id = m.id AND cm.brawler_id = $3
+                ))
             ORDER BY m.created_at DESC
         "#;
 
         let status_bind: Option<String> = mission_filter.status.as_ref().map(|s| s.to_string());
         let name_bind: Option<String> = mission_filter.name.as_ref().map(|n| format!("%{}%", n));
+        let brawler_id_bind = mission_filter.brawler_id;
 
         let rows = diesel::sql_query(sql)
             .bind::<Nullable<Varchar>, _>(status_bind)
             .bind::<Nullable<Varchar>, _>(name_bind)
+            .bind::<Nullable<diesel::sql_types::Int4>, _>(brawler_id_bind)
             .load::<MissionModel>(&mut conn)?;
 
         Ok(rows)

@@ -27,6 +27,7 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let protected_router = Router::new()
         .route("/avatar", post(upload_avatar))
         .route("/my-missions", get(get_mission))
+        .route("/update-name", post(update_name))
         .route_layer(axum::middleware::from_fn(authorization));
 
     Router::new()
@@ -75,5 +76,27 @@ where
     {
         Ok(uploaded_image) => (StatusCode::CREATED, Json(uploaded_image)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+    }
+}
+
+#[derive(serde::Deserialize)]
+pub struct UpdateNameModel {
+    pub display_name: String,
+}
+
+pub async fn update_name<T>(
+    State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
+    Extension(brawler_id): Extension<i32>,
+    Json(update_name_model): Json<UpdateNameModel>,
+) -> impl IntoResponse
+where
+    T: BrawlerRepository + Send + Sync,
+{
+    match brawlers_use_case
+        .update_display_name(brawler_id, update_name_model.display_name)
+        .await
+    {
+        Ok(_) => (StatusCode::OK, "Name updated successfully").into_response(),
+        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
     }
 }

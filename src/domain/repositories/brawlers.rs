@@ -20,6 +20,9 @@ pub trait BrawlerRepository {
         base64_image: Base64Image,
         option: UploadImageOptions,
     ) -> Result<UploadedImage>;
+    async fn find_by_id(&self, brawler_id: i32) -> Result<BrawlerEntity>;
+    async fn find_by_name_and_tag(&self, name: &str, tag: &str) -> Result<Option<BrawlerEntity>>;
+    async fn update_name(&self, brawler_id: i32, new_name: String) -> Result<()>;
     async fn crew_counting(&self, brawler_id: i32) -> Result<u32>;
     async fn get_missions(&self, brawler_id: i32) -> Result<Vec<MissionModel>>;
 }
