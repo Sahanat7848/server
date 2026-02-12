@@ -1,6 +1,13 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    Cen (id) {
+        id -> Int8,
+        created_at -> Timestamptz,
+    }
+}
+
+diesel::table! {
     brawlers (id) {
         id -> Int4,
         #[max_length = 255]
@@ -71,6 +78,7 @@ diesel::joinable!(crew_memberships -> missions (mission_id));
 diesel::joinable!(missions -> brawlers (chief_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    Cen,
     brawlers,
     crew_memberships,
     friendships,
